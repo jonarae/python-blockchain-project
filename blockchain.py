@@ -16,6 +16,15 @@ def get_transaction_amount():
 def get_user_input():
     return input('Your choice please: ')
 
+def verify_chain():
+    for block_index in range(len(blockchain)):
+        if block_index == 0:
+            continue
+        elif blockchain[block_index][0] != blockchain[block_index-1]:
+            return False
+    else:
+        return True
+
 waiting_for_user_input = True
 
 while waiting_for_user_input:
@@ -39,5 +48,11 @@ while waiting_for_user_input:
     elif (user_input == 'h'):
         if len(blockchain) >= 1:
             blockchain[0] = 2
+    else:
+        print('Input was invalid, please pick a value from the list!')
+
+    if not verify_chain():
+        print('Invalid chain!')
+        break
 
 print('Done!')
