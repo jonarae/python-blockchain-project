@@ -25,6 +25,11 @@ def verify_chain():
     else:
         return True
 
+def print_blockchain_elements():
+    for block in blockchain:
+            print('Outputting block')
+            print(block)
+
 waiting_for_user_input = True
 
 while waiting_for_user_input:
@@ -40,9 +45,7 @@ while waiting_for_user_input:
         tx_amount = get_transaction_amount()
         add_value(tx_amount, get_last_blockchain_value())
     elif (user_input == '2'):
-        for block in blockchain:
-            print('Outputting block')
-            print(block)
+        print_blockchain_elements()
     elif (user_input == 'q'):
         waiting_for_user_input = False
     elif (user_input == 'h'):
@@ -52,6 +55,7 @@ while waiting_for_user_input:
         print('Input was invalid, please pick a value from the list!')
 
     if not verify_chain():
+        print_blockchain_elements()
         print('Invalid chain!')
         break
 
