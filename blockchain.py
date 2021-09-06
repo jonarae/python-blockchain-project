@@ -8,6 +8,10 @@ open_transactions = []
 owner = 'Jona'
 
 
+def hash_block(block):
+    return '-'.join([str(block[key]) for key in block])
+
+
 def get_last_blockchain_value():
     if len(blockchain) < 1:
         return None
@@ -30,7 +34,7 @@ def get_transaction_data():
 
 def mine_block():
     last_block = blockchain[-1]
-    hashed_block = '-'.join([str(last_block[key]) for key in last_block])
+    hashed_block = hash_block(last_block)
     blockchain.append({
         'previous_hash': hashed_block,
         'index': len(blockchain),
@@ -44,19 +48,20 @@ def get_user_input():
 
 
 def verify_chain():
-    for block_index in range(len(blockchain)):
-        if block_index == 0:
+    for (index, block) in enumerate(blockchain):
+        if (index == 0):
             continue
-        elif blockchain[block_index][0] != blockchain[block_index-1]:
+        elif (block['previous_hash'] != hash_block(blockchain[index - 1])):
             return False
-    else:
-        return True
+    return True
 
 
 def print_blockchain_elements():
     for block in blockchain:
         print('Outputting block')
         print(block)
+
+    print('-' * 20)
 
 
 waiting_for_user_input = True
@@ -84,13 +89,14 @@ while waiting_for_user_input:
         waiting_for_user_input = False
     elif (user_input == 'h'):
         if len(blockchain) >= 1:
-            blockchain[0] = 2
+            blockchain[0] = {'previous_hash': '1234sdfd', 'index': 0, 'transactions': [
+                {'sender': 'Angelie', 'recipient': 'Jona', 'amount': 100000}]}
     else:
         print('Input was invalid, please pick a value from the list!')
 
-    # if not verify_chain():
-    #     print_blockchain_elements()
-    #     print('Invalid chain!')
-    #     break
+    if not verify_chain():
+        print_blockchain_elements()
+        print('Invalid chain!')
+        break
 
 print('Done!')
