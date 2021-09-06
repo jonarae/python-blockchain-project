@@ -1,17 +1,23 @@
 blockchain = []
+open_transactions = []
+owner = 'Jona'
 
 def get_last_blockchain_value():
     if len(blockchain) < 1:
         return None
     return blockchain[-1]
 
-def add_value(transaction_amount, last_transaction=[1]):
-    if (last_transaction == None):
-        last_transaction = [1]
-    blockchain.append([last_transaction, transaction_amount])
+def add_transaction(recipient, amount, sender=owner):
+    open_transactions.append({
+        'sender': sender,
+        'recipient': recipient,
+        'amount': amount
+    })
 
-def get_transaction_amount():
-    return float(input('Your transaction amount please: '))
+def get_transaction_data():
+    recipient = input('Enter the recipient of the amount: ')
+    amount = float(input('Your transaction amount please: '))
+    return recipient, amount
 
 def get_user_input():
     return input('Your choice please: ')
@@ -42,8 +48,10 @@ while waiting_for_user_input:
     user_input = get_user_input()
     
     if (user_input == '1'):
-        tx_amount = get_transaction_amount()
-        add_value(tx_amount, get_last_blockchain_value())
+        transaction_data = get_transaction_data()
+        recipient, amount = transaction_data
+        add_transaction(recipient, amount)
+        print(open_transactions)
     elif (user_input == '2'):
         print_blockchain_elements()
     elif (user_input == 'q'):
