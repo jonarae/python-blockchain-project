@@ -69,7 +69,8 @@ def get_transaction_data():
 def mine_block():
     last_block = blockchain[-1]
     hashed_block = hash_block(last_block)
-    open_transactions.append({
+    copied_transactions = open_transactions[:];
+    copied_transactions.append({
         'sender': 'MINING',
         'recipient': owner,
         'amount': MINING_REWARD
@@ -77,7 +78,7 @@ def mine_block():
     blockchain.append({
         'previous_hash': hashed_block,
         'index': len(blockchain),
-        'transactions': open_transactions
+        'transactions': copied_transactions
     })
     print(blockchain)
     return True
@@ -104,6 +105,9 @@ def print_blockchain_elements():
 
     print('-' * 20)
 
+def verify_transactions():
+    return all([verify_transaction(tx) for tx in open_transactions])
+
 
 waiting_for_user_input = True
 
@@ -113,6 +117,7 @@ while waiting_for_user_input:
     print('2: Mine new block')
     print('3: Output the blockchain blocks')
     print('4: Print Participants')
+    print('5: Verify Open Transactions')
     print('h: Manipulate the chain')
     print('q: Quit')
 
@@ -130,6 +135,11 @@ while waiting_for_user_input:
         print_blockchain_elements()
     elif (user_input == '4'):
         print(participants)
+    elif (user_input == '5'):
+        if verify_transactions:
+            print('All transactions are valid')
+        else:
+            print('There are invalid transactions!')
     elif (user_input == 'q'):
         waiting_for_user_input = False
     elif (user_input == 'h'):
