@@ -42,21 +42,24 @@ def verify_transaction(transaction):
 
 
 def get_balance(participant):
-    sender_sent_amounts = [[transaction['amount'] for transaction in block['transactions'] if transaction['sender'] == participant] for block in blockchain]
-    sender_open_transactions_amount = [transaction['amount'] for transaction in open_transactions if transaction['sender'] == participant]
+    sender_sent_amounts = [[transaction['amount'] for transaction in block['transactions']
+                            if transaction['sender'] == participant] for block in blockchain]
+    sender_open_transactions_amount = [transaction['amount']
+                                       for transaction in open_transactions if transaction['sender'] == participant]
     amount_sent = 0
     for transaction_amount in sender_sent_amounts:
         if len(transaction_amount) > 0:
             amount_sent += transaction_amount[0]
     for amount in sender_open_transactions_amount:
         amount_sent += amount
-    
-    sender_received_amounts = [[transaction['amount'] for transaction in block['transactions'] if transaction['recipient'] == participant] for block in blockchain]
+
+    sender_received_amounts = [[transaction['amount'] for transaction in block['transactions']
+                                if transaction['recipient'] == participant] for block in blockchain]
     amount_received = 0
     for transaction_amount in sender_received_amounts:
         if len(transaction_amount) > 0:
             amount_received += transaction_amount[0]
-    
+
     return amount_received - amount_sent
 
 
@@ -69,7 +72,7 @@ def get_transaction_data():
 def mine_block():
     last_block = blockchain[-1]
     hashed_block = hash_block(last_block)
-    copied_transactions = open_transactions[:];
+    copied_transactions = open_transactions[:]
     copied_transactions.append({
         'sender': 'MINING',
         'recipient': owner,
@@ -82,7 +85,6 @@ def mine_block():
     })
     print(blockchain)
     return True
-
 
 
 def get_user_input():
@@ -104,6 +106,7 @@ def print_blockchain_elements():
         print(block)
 
     print('-' * 20)
+
 
 def verify_transactions():
     return all([verify_transaction(tx) for tx in open_transactions])
@@ -153,5 +156,8 @@ while waiting_for_user_input:
         print_blockchain_elements()
         print('Invalid chain!')
         break
+
+    current_balance = get_balance(owner)
+    print(f'Balance of {owner}: {current_balance:10.2f}')
 
 print('Done!')
