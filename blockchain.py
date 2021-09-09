@@ -1,3 +1,5 @@
+import functools
+
 MINING_REWARD = 10.0
 
 genesis_block = {
@@ -37,7 +39,7 @@ def verify_transaction(transaction):
     sender_balance = get_balance(transaction['sender'])
     if sender_balance >= transaction['amount']:
         return True
-    print('Insufficient balance: ' + str(sender_balance))
+    print('Insufficient balance!')
     return False
 
 
@@ -46,19 +48,16 @@ def get_balance(participant):
                             if transaction['sender'] == participant] for block in blockchain]
     sender_open_transactions_amount = [transaction['amount']
                                        for transaction in open_transactions if transaction['sender'] == participant]
-    amount_sent = 0
-    for transaction_amount in sender_sent_amounts:
-        if len(transaction_amount) > 0:
-            amount_sent += transaction_amount[0]
-    for amount in sender_open_transactions_amount:
-        amount_sent += amount
+    amount_sent = functools.reduce(lambda transaction_sum, transaction_amount: transaction_sum + sum(
+        transaction_amount) if len(transaction_amount) > 0 else transaction_sum, sender_sent_amounts, 0)
+
+    amount_sent = amount_sent + functools.reduce(
+        lambda transaction_sum, transaction_amount: transaction_sum + transaction_amount, sender_open_transactions_amount, 0)
 
     sender_received_amounts = [[transaction['amount'] for transaction in block['transactions']
                                 if transaction['recipient'] == participant] for block in blockchain]
-    amount_received = 0
-    for transaction_amount in sender_received_amounts:
-        if len(transaction_amount) > 0:
-            amount_received += transaction_amount[0]
+    amount_received = functools.reduce(lambda transaction_sum, transaction_amount: transaction_sum + sum(
+        transaction_amount) if len(transaction_amount) > 0 else transaction_sum, sender_received_amounts, 0)
 
     return amount_received - amount_sent
 
@@ -115,6 +114,7 @@ def verify_transactions():
 waiting_for_user_input = True
 
 while waiting_for_user_input:
+    print('-' * 20)
     print('Please choose')
     print('1: Add a new transaction value')
     print('2: Mine new block')
