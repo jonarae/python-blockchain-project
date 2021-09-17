@@ -6,14 +6,6 @@ from file_util import save_data, load_data
 
 MINING_REWARD = 10.0
 
-genesis_block = {
-    'previous_hash': '',
-    'index': 0,
-    'transactions': [],
-    'proof': 100
-}
-blockchain = [genesis_block]
-open_transactions = []
 owner = 'Jona'
 participants = {owner}
 
