@@ -1,8 +1,9 @@
-from hash_util import hash_block
+from utility.hash_util import hash_block
+from utility.verification import Verification
+from utility.printable import Printable
+
 import functools
-from verification import Verification
 from transaction import Transaction
-from printable import Printable
 from block import Block
 
 MINING_REWARD = 10.0
