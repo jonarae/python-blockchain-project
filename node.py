@@ -1,5 +1,5 @@
 from blockchain_file import BlockchainFile
-from verification import Verification
+from utility.verification import Verification
 
 
 class Node:
