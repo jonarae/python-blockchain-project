@@ -127,3 +127,7 @@ dmypy.json
 
 # Pyre type checker
 .pyre/
+
+# Blockchain txt files
+blockchain.txt
+wallet.txt
