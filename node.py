@@ -1,10 +1,12 @@
 from blockchain_file import BlockchainFile
 from utility.verification import Verification
+from wallet import Wallet
 
 
 class Node:
     def __init__(self):
-        self.id = 'JONA'
+        self.wallet = Wallet()
+        self.wallet.create_keys()
         self.blockchain = BlockchainFile.load_data()
 
     def get_transaction_data(self):
@@ -33,6 +35,9 @@ class Node:
             print('2: Mine new block')
             print('3: Output the blockchain blocks')
             print('4: Verify Open Transactions')
+            print('5: Create wallet')
+            print('6: Load Wallet')
+            print('7: Save Keys')
             print('q: Quit')
 
             user_input = self.get_user_input()
@@ -40,10 +45,10 @@ class Node:
             if (user_input == '1'):
                 transaction_data = self.get_transaction_data()
                 recipient, amount = transaction_data
-                self.blockchain.add_transaction(recipient, amount, self.id)
+                self.blockchain.add_transaction(recipient, amount, self.wallet.public_key)
                 BlockchainFile.save_data(self.blockchain)
             elif (user_input == '2'):
-                if self.blockchain.mine_block(self.id):
+                if self.blockchain.mine_block(self.wallet.public_key):
                     BlockchainFile.save_data(self.blockchain)
             elif (user_input == '3'):
                 self.print_blockchain_elements()
@@ -52,6 +57,12 @@ class Node:
                     print('All transactions are valid')
                 else:
                     print('There are invalid transactions!')
+            elif (user_input == '5'):
+                self.wallet.create_keys()
+            elif (user_input == '6'):
+                self.wallet.load_keys()
+            elif (user_input == '7'):
+                self.wallet.save_keys()
             elif (user_input == 'q'):
                 waiting_for_user_input = False
             else:
@@ -63,8 +74,8 @@ class Node:
                 break
 
             print('-' * 50)
-            current_balance = self.blockchain.get_balance(self.id)
-            print(f'Balance of {self.id}: {current_balance:10.2f}')
+            current_balance = self.blockchain.get_balance(self.wallet.public_key)
+            print(f'Balance of {self.wallet.public_key}: {current_balance:10.2f}')
 
         print('Done!')
 
