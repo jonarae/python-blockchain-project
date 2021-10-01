@@ -45,7 +45,8 @@ class Node:
             if (user_input == '1'):
                 transaction_data = self.get_transaction_data()
                 recipient, amount = transaction_data
-                self.blockchain.add_transaction(recipient, amount, self.wallet.public_key)
+                signature = self.wallet.sign_transaction(self.wallet.public_key, recipient, amount)
+                self.blockchain.add_transaction(recipient, amount, self.wallet.public_key, signature)
                 BlockchainFile.save_data(self.blockchain)
             elif (user_input == '2'):
                 if self.blockchain.mine_block(self.wallet.public_key):
