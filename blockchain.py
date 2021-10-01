@@ -45,8 +45,8 @@ class Blockchain(Printable):
 
         return amount_received - amount_sent
 
-    def add_transaction(self, recipient, amount, sender):
-        transaction = Transaction(sender, recipient, amount)
+    def add_transaction(self, recipient, amount, sender, signature):
+        transaction = Transaction(sender, recipient, amount, signature)
 
         if Verification.verify_transaction(transaction, self.get_balance):
             self.open_transactions.append(transaction)
@@ -56,7 +56,7 @@ class Blockchain(Printable):
         hashed_block = hash_block(last_block)
         proof = self.proof_of_work()
 
-        reward_transaction = Transaction('MINING', recipient, MINING_REWARD)
+        reward_transaction = Transaction('MINING', recipient, MINING_REWARD, '')
 
         copied_transactions = self.open_transactions[:]
         copied_transactions.append(reward_transaction)
