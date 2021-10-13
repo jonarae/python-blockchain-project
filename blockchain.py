@@ -53,6 +53,8 @@ class Blockchain(Printable):
 
         if Verification.verify_transaction(transaction, self.get_balance):
             self.open_transactions.append(transaction)
+            return True
+        return False
 
     def mine_block(self, recipient):
         if recipient == None:

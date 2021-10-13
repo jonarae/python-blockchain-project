@@ -1,5 +1,5 @@
 from hashlib import blake2b
-from flask import Flask, json, jsonify
+from flask import Flask, json, jsonify, request
 from flask_cors import CORS
 from wallet import Wallet
 from blockchain_file import BlockchainFile
@@ -89,6 +89,54 @@ def get_chain():
                                  for transaction in block['transactions']]
     return jsonify(blockchain_snapshot), 200
 
+
+@app.route ('/transaction', methods=['POST'])
+def add_transaction():
+    if wallet.public_key == None:
+        response = {
+            'message': 'No wallet setup'
+        }
+        return jsonify(response), 400
+    
+    values = request.get_json()
+    if not values:
+        response = {
+            'message': 'No data found'
+        }
+        return jsonify(response), 400
+
+    required_fields = ['recipient', 'amount']
+    if not all(field in values for field in required_fields):
+        response = {
+            'message': 'Required data is missing'
+        }
+        return jsonify(response), 400
+
+    recipient = values['recipient']
+    amount = values['amount']
+    
+    signature = wallet.sign_transaction(wallet.public_key, recipient, amount)
+    is_success = blockchain.add_transaction(recipient, amount, wallet.public_key, signature)
+
+    if is_success:
+        BlockchainFile.save_data(blockchain)
+        response = {
+            'funds': blockchain.get_balance(wallet.public_key),
+            'message': 'Successfully added transaction',
+            'transaction': {
+                'sender': wallet.public_key,
+                'recipient': recipient,
+                'amount': amount,
+                'signature': signature
+            }
+        }
+        return jsonify(response), 200
+    else:
+        response = {
+            'message': 'Adding of transaction failed'
+        }
+        return jsonify(response), 500
+    
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
