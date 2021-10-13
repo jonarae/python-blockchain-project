@@ -28,6 +28,9 @@ class Blockchain(Printable):
         return proof
 
     def get_balance(self, participant):
+        if not participant:
+            return 0.00
+
         sender_sent_amounts = [[transaction.amount for transaction in block.transactions
                                 if transaction.sender == participant] for block in self.chain]
         sender_open_transactions_amount = [transaction.amount
@@ -52,6 +55,9 @@ class Blockchain(Printable):
             self.open_transactions.append(transaction)
 
     def mine_block(self, recipient):
+        if recipient == None:
+            return False
+
         last_block = self.chain[-1]
         hashed_block = hash_block(last_block)
         proof = self.proof_of_work()
@@ -61,7 +67,8 @@ class Blockchain(Printable):
         copied_transactions = self.open_transactions[:]
         copied_transactions.append(reward_transaction)
 
-        self.chain.append(Block(hashed_block, len(
-            self.chain), copied_transactions, proof))
+        mined_block = Block(hashed_block, len(
+            self.chain), copied_transactions, proof)
+        self.chain.append(mined_block)
         self.open_transactions = []
-        return True
+        return mined_block
