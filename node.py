@@ -136,6 +136,13 @@ def add_transaction():
             'message': 'Adding of transaction failed'
         }
         return jsonify(response), 500
+
+
+@app.route('/transactions', methods=['GET'])
+def get_open_transactions():
+    open_transactions = blockchain.get_open_transactions()
+    open_transactions_dict = [transaction.__dict__.copy() for transaction in open_transactions]
+    return jsonify(open_transactions_dict), 200
     
 
 if __name__ == '__main__':

@@ -14,6 +14,9 @@ class Blockchain(Printable):
         self.chain = chain
         self.open_transactions = open_transactions
 
+    def get_open_transactions(self):
+        return self.open_transactions
+
     def get_last_blockchain_value(self):
         if len(self.chain) < 1:
             return None
