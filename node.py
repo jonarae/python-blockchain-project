@@ -1,5 +1,5 @@
 from hashlib import blake2b
-from flask import Flask, json, jsonify, request
+from flask import Flask, json, jsonify, request, send_from_directory
 from flask_cors import CORS
 from wallet import Wallet
 from blockchain_file import BlockchainFile
@@ -12,7 +12,7 @@ CORS(app)
 
 @app.route('/', methods=['GET'])
 def get_ui():
-    return 'This works!'
+    return send_from_directory('ui', 'node.html')
 
 @app.route('/balance', methods=['GET'])
 def get_balance():
