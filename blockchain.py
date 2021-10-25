@@ -13,7 +13,8 @@ class Blockchain(Printable):
     def __init__(self, chain, open_transactions):
         self.chain = chain
         self.open_transactions = open_transactions
-
+        self.peer_nodes = set()
+ 
     def get_open_transactions(self):
         return self.open_transactions
 
@@ -77,3 +78,9 @@ class Blockchain(Printable):
         self.chain.append(mined_block)
         self.open_transactions = []
         return mined_block
+
+    def add_peer_node(self, node):
+        self.peer_nodes.add(node)
+    
+    def remove_peer_node(self, node):
+        self.peer_nodes.discard(node)
