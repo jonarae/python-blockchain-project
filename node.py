@@ -165,7 +165,7 @@ def add_node():
 
     response = {
         'message': 'Node added successfully',
-        'all_nodes': list(blockchain.get_all_nodes())
+        'all_nodes': blockchain.get_all_nodes()
     }
     return jsonify(response), 200
 
@@ -182,10 +182,19 @@ def remove_node(node_url):
 
     response = {
         'message': 'Removed node successfully.',
-        'all_nodes': list(blockchain.get_all_nodes())
+        'all_nodes': blockchain.get_all_nodes()
     }
     return jsonify(response), 200
     
+
+@app.route('/nodes', methods=['GET'])
+def get_nodes():
+    nodes = blockchain.get_all_nodes()
+    response = {
+        'all_nodes': nodes
+    }
+    return jsonify(response), 200
+
 
 if __name__ == '__main__':
     app.run(host='0.0.0.0', port=5000)
