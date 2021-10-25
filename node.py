@@ -143,6 +143,31 @@ def get_open_transactions():
     open_transactions = blockchain.get_open_transactions()
     open_transactions_dict = [transaction.__dict__.copy() for transaction in open_transactions]
     return jsonify(open_transactions_dict), 200
+
+
+@app.route('/node', methods=['POST'])
+def add_node():
+    values = request.get_json()
+    if not values:
+        response = {
+            'message': 'No data found.'
+        }
+        return jsonify(response), 401
+    if not 'node' in values:
+        response = {
+            'message': 'No node data found.'
+        }
+        return jsonify(response), 401
+    
+    node = values['node']
+    blockchain.add_peer_node(node)
+    BlockchainFile.save_data(blockchain)
+
+    response = {
+        'message': 'Node added successfully',
+        'all_nodes': list(blockchain.get_all_nodes())
+    }
+    return jsonify(response), 200
     
 
 if __name__ == '__main__':
