@@ -86,4 +86,4 @@ class Blockchain(Printable):
         self.peer_nodes.discard(node)
     
     def get_all_nodes(self):
-        return self.peer_nodes
+        return list(self.peer_nodes)
