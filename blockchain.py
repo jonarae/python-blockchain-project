@@ -84,3 +84,6 @@ class Blockchain(Printable):
     
     def remove_peer_node(self, node):
         self.peer_nodes.discard(node)
+    
+    def get_all_nodes(self):
+        return self.peer_nodes
