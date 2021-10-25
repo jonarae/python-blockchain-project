@@ -168,6 +168,23 @@ def add_node():
         'all_nodes': list(blockchain.get_all_nodes())
     }
     return jsonify(response), 200
+
+@app.route('/node/<node_url>', methods=['DELETE'])
+def remove_node(node_url):
+    if node_url == '' or node_url == None:
+        response = {
+            'message': 'No node found.'
+        }
+        return jsonify(response), 400
+    
+    blockchain.remove_peer_node(node_url)
+    BlockchainFile.save_data(blockchain)
+
+    response = {
+        'message': 'Removed node successfully.',
+        'all_nodes': list(blockchain.get_all_nodes())
+    }
+    return jsonify(response), 200
     
 
 if __name__ == '__main__':
