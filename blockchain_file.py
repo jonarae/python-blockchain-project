@@ -7,7 +7,8 @@ class BlockchainFile:
     @staticmethod
     def save_data(blockchain):
         try:
-            with open('blockchain.txt', mode='wb') as f:
+            node_id = blockchain.node_id
+            with open(f'blockchain-{node_id}.txt', mode='wb') as f:
                 f.write(pickle.dumps({
                     'blockchain': blockchain.chain,
                     'open_transactions': blockchain.open_transactions,
@@ -17,15 +18,15 @@ class BlockchainFile:
             print('File was not saved!')
 
     @staticmethod
-    def load_data():
+    def load_data(node_id):
         try:
-            with open('blockchain.txt', mode='rb') as f:
+            with open(f'blockchain-{node_id}.txt', mode='rb') as f:
                 blockchain_data = pickle.loads(f.read())
-                return Blockchain(blockchain_data['blockchain'], blockchain_data['open_transactions'], set(blockchain_data['peer_nodes']))
+                return Blockchain(blockchain_data['blockchain'], blockchain_data['open_transactions'], set(blockchain_data['peer_nodes']), node_id)
 
         except IOError:
             genesis_block = Block('', 0, [], 100)
             blockchain = [genesis_block]
             open_transactions = []
             peer_nodes = set()
-            return Blockchain(blockchain, open_transactions, peer_nodes)
+            return Blockchain(blockchain, open_transactions, peer_nodes, node_id)
