@@ -1,3 +1,4 @@
+import argparse
 from hashlib import blake2b
 from flask import Flask, json, jsonify, request, send_from_directory
 from flask_cors import CORS
@@ -5,14 +6,16 @@ from wallet import Wallet
 from blockchain_file import BlockchainFile
 
 app = Flask(__name__)
-wallet = Wallet()
-blockchain = BlockchainFile.load_data()
 CORS(app)
 
 
 @app.route('/', methods=['GET'])
-def get_ui():
+def get_node_ui():
     return send_from_directory('ui', 'node.html')
+
+@app.route('/network', methods=['GET'])
+def get_network_ui():
+    return send_from_directory('ui', 'network.html')
 
 @app.route('/balance', methods=['GET'])
 def get_balance():
@@ -197,4 +200,12 @@ def get_nodes():
 
 
 if __name__ == '__main__':
-    app.run(host='0.0.0.0', port=5000)
+    from argparse import ArgumentParser
+    parser = ArgumentParser()
+    parser.add_argument('-p', '--port', type=int, default=5000)
+    args = parser.parse_args()
+    node_id = args.port
+
+    wallet = Wallet(node_id)
+    blockchain = BlockchainFile.load_data(node_id)
+    app.run(host='0.0.0.0', port=node_id)

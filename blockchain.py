@@ -10,10 +10,11 @@ MINING_REWARD = 10.0
 
 
 class Blockchain(Printable):
-    def __init__(self, chain, open_transactions, peer_nodes):
+    def __init__(self, chain, open_transactions, peer_nodes, node_id):
         self.chain = chain
         self.open_transactions = open_transactions
         self.peer_nodes = peer_nodes
+        self.node_id = node_id
  
     def get_open_transactions(self):
         return self.open_transactions
