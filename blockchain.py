@@ -57,13 +57,14 @@ class Blockchain(Printable):
     def add_transaction(self, recipient, amount, sender, signature, from_broadcast=False):
         transaction = Transaction(sender, recipient, amount, signature)
 
-        if not from_broadcast:
-            if Verification.verify_transaction(transaction, self.get_balance):
-                self.open_transactions.append(transaction)
-                self.broadcast_transaction(transaction)
-                return True
+        if from_broadcast:
+            check_funds = False
         else:
+            check_funds = True
+
+        if Verification.verify_transaction(transaction, self.get_balance, check_funds):
             self.open_transactions.append(transaction)
+            self.broadcast_transaction(transaction)
             return True
         return False
     
@@ -95,6 +96,7 @@ class Blockchain(Printable):
         self.chain.append(mined_block)
         self.open_transactions = []
         return mined_block
+
 
     def add_peer_node(self, node):
         self.peer_nodes.add(node)
