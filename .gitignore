@@ -129,5 +129,5 @@ dmypy.json
 .pyre/
 
 # Blockchain txt files
-blockchain.txt
-wallet.txt
+blockchain*.txt
+wallet*.txt
