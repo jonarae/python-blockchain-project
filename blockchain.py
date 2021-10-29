@@ -3,6 +3,7 @@ from utility.verification import Verification
 from utility.printable import Printable
 
 import functools
+import requests
 from transaction import Transaction
 from block import Block
 
@@ -53,13 +54,28 @@ class Blockchain(Printable):
 
         return amount_received - amount_sent
 
-    def add_transaction(self, recipient, amount, sender, signature):
+    def add_transaction(self, recipient, amount, sender, signature, from_broadcast=False):
         transaction = Transaction(sender, recipient, amount, signature)
 
-        if Verification.verify_transaction(transaction, self.get_balance):
+        if not from_broadcast:
+            if Verification.verify_transaction(transaction, self.get_balance):
+                self.open_transactions.append(transaction)
+                self.broadcast_transaction(transaction)
+                return True
+        else:
             self.open_transactions.append(transaction)
             return True
         return False
+    
+    def broadcast_transaction(self, transaction):
+        for node_id in self.peer_nodes:
+            requests.post(f'http://{node_id}/transaction', json={
+                'recipient': transaction.recipient,
+                'amount': transaction.amount,
+                'sender': transaction.sender,
+                'signature': transaction.signature,
+                'from_broadcast': True
+            })
 
     def mine_block(self, recipient):
         if recipient == None:

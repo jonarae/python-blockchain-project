@@ -95,19 +95,13 @@ def get_chain():
 
 @app.route ('/transaction', methods=['POST'])
 def add_transaction():
-    if wallet.public_key == None:
-        response = {
-            'message': 'No wallet setup'
-        }
-        return jsonify(response), 400
-    
     values = request.get_json()
     if not values:
         response = {
             'message': 'No data found'
         }
         return jsonify(response), 400
-
+    
     required_fields = ['recipient', 'amount']
     if not all(field in values for field in required_fields):
         response = {
@@ -117,22 +111,45 @@ def add_transaction():
 
     recipient = values['recipient']
     amount = values['amount']
-    
-    signature = wallet.sign_transaction(wallet.public_key, recipient, amount)
-    is_success = blockchain.add_transaction(recipient, amount, wallet.public_key, signature)
+
+    if 'from_broadcast' in values and values['from_broadcast'] is True:
+        sender = values['sender']
+        signature = values['signature']
+        from_broadcast = True
+    else:
+        sender = wallet.public_key
+        signature = wallet.sign_transaction(sender, recipient, amount)
+        from_broadcast = False
+
+    if signature:
+        for transaction in blockchain.open_transactions:
+            if signature == transaction.signature:
+                response = {
+                    'message': 'Transaction is already in blockchain'
+                }
+                return jsonify(response), 200
+
+    if wallet.public_key == None:
+        response = {
+            'message': 'No wallet setup'
+        }
+        return jsonify(response), 400
+
+    is_success = blockchain.add_transaction(recipient, amount, sender, signature, from_broadcast)
 
     if is_success:
         BlockchainFile.save_data(blockchain)
         response = {
-            'funds': blockchain.get_balance(wallet.public_key),
+            'funds': blockchain.get_balance(sender),
             'message': 'Successfully added transaction',
             'transaction': {
-                'sender': wallet.public_key,
+                'sender': sender,
                 'recipient': recipient,
                 'amount': amount,
                 'signature': signature
             }
         }
+
         return jsonify(response), 200
     else:
         response = {
