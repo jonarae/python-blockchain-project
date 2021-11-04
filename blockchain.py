@@ -1,9 +1,12 @@
+from flask import helpers
+from flask.json import jsonify
 from utility.hash_util import hash_block
 from utility.verification import Verification
 from utility.printable import Printable
 
 import functools
 import requests
+import pickle
 from transaction import Transaction
 from block import Block
 
@@ -82,10 +85,10 @@ class Blockchain(Printable):
         if recipient == None:
             return False
 
-        last_block = self.chain[-1]
+        last_block = self.get_last_blockchain_value()
         hashed_block = hash_block(last_block)
         proof = self.proof_of_work()
-
+        
         reward_transaction = Transaction('MINING', recipient, MINING_REWARD, '')
 
         copied_transactions = self.open_transactions[:]
@@ -95,7 +98,34 @@ class Blockchain(Printable):
             self.chain), copied_transactions, proof)
         self.chain.append(mined_block)
         self.open_transactions = []
+        self.broadcast_mined_block(mined_block)
         return mined_block
+
+
+    def broadcast_mined_block(self, mined_block):
+        for node_id in self.peer_nodes:
+            requests.post(
+                f'http://{node_id}/block',
+                json={
+                    'block': mined_block.to_order_dict()
+                }
+            )
+    
+    def add_block(self, mined_block):
+        block = Block(dict=mined_block)
+
+        last_block = self.get_last_blockchain_value()
+        hashed_block = hash_block(last_block)
+
+        is_previous_hash_valid = block.previous_hash == hashed_block
+        is_index_valid = block.index == len(self.chain)
+        is_proof_valid = Verification.is_valid_proof(self.open_transactions, hashed_block, block.proof)
+        
+        if is_previous_hash_valid and is_index_valid and is_proof_valid:
+            self.chain.append(block)
+            return True
+        else:
+            return False
 
 
     def add_peer_node(self, node):
