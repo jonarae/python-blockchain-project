@@ -61,27 +61,49 @@ def load_wallet():
 
 @app.route('/mine', methods=['POST'])
 def mine_block():
-    mined_block = blockchain.mine_block(wallet.public_key)
+    recipient = wallet.public_key
+
+    mined_block = blockchain.mine_block(recipient)
     if mined_block:
         BlockchainFile.save_data(blockchain)
-        mined_block_dict = mined_block.__dict__.copy()
-        mined_block_dict['transactions'] = [transaction.__dict__.copy()
-                                for transaction in mined_block.transactions]
+        mined_block_dict = mined_block.to_order_dict()
 
         response = {
             'message': 'Successfully added a new block!',
             'block': mined_block_dict,
-            'funds': blockchain.get_balance(wallet.public_key)
+            'funds': blockchain.get_balance(recipient)
         }
         return jsonify(response), 201
     else:
         response = {
             'message': 'Adding new block failed!',
-            'wallet_up': wallet.public_key != None
+            'wallet_up': recipient != None
         }
         return jsonify(response), 400
 
+@app.route('/block', methods=['POST'])
+def add_block():
+    values = request.get_json()
+    if not 'block' in values:
+        response = {
+            'message': 'No block value found.'
+        }
+        return jsonify(response), 400
+    
+    block = values['block']
+    if blockchain.add_block(block):
+        BlockchainFile.save_data(blockchain)
+        response = {
+            'message': 'Successfully added block!'
+        }
+        return jsonify(response), 200
+    else:
+        response = {
+            'message': 'Adding of new block failed!'
+        }
+        return jsonify(response), 400
 
+    
 @app.route('/chain', methods=['GET'])
 def get_chain():
     blockchain_snapshot = blockchain.chain
