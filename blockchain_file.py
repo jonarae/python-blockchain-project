@@ -25,7 +25,7 @@ class BlockchainFile:
                 return Blockchain(blockchain_data['blockchain'], blockchain_data['open_transactions'], set(blockchain_data['peer_nodes']), node_id)
 
         except IOError:
-            genesis_block = Block('', 0, [], 100)
+            genesis_block = Block(index=0, transactions=[], proof=100, timestamp=1)
             blockchain = [genesis_block]
             open_transactions = []
             peer_nodes = set()

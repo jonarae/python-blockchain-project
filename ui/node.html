@@ -283,7 +283,8 @@
 
                     axios.post('/transaction', {
                         recipient: vm.outgoingTx.recipient,
-                        amount: vm.outgoingTx.amount
+                        amount: vm.outgoingTx.amount,
+                        timestamp: new Date().getTime()
                     })
                         .then(response => {
                             console.log(response.data);
@@ -316,7 +317,10 @@
                         vm.dataLoading = true;
                         axios.get('/chain')
                             .then(response => {
-                                vm.blockchain = response.data;
+                                console.log(response);
+
+                                vm.blockchain = response.data.blockchain;
+                                vm.funds = response.data.funds;
                                 vm.dataLoading = false;
                             })
                             .catch(error => {

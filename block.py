@@ -4,7 +4,7 @@ from utility.printable import Printable
 
 
 class Block(Printable):
-    def __init__(self, previous_hash='', index='', transactions='', proof='', timestamp=1, dict=None):
+    def __init__(self, previous_hash='', index='', transactions='', proof='', timestamp=time(), dict=None):
         if dict is None:
             self.previous_hash = previous_hash
             self.index = index
