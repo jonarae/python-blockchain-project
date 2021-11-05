@@ -19,6 +19,21 @@ class Blockchain(Printable):
         self.open_transactions = open_transactions
         self.peer_nodes = peer_nodes
         self.node_id = node_id
+
+    def to_order_dict(self):
+        blockchain_dict = self.__dict__.copy()
+        blockchain_dict['peer_nodes'] = list(self.peer_nodes)
+        
+        blockchain_dict['chain'] = []
+        blockchain_dict['open_transactions'] = []
+
+        for block in self.chain:
+            blockchain_dict['chain'].append(block.to_order_dict())
+        for transaction in self.open_transactions:
+            blockchain_dict['open_transactions'].append(transaction.to_order_dict())
+            
+
+        return blockchain_dict
  
     def get_open_transactions(self):
         return self.open_transactions
@@ -57,8 +72,8 @@ class Blockchain(Printable):
 
         return amount_received - amount_sent
 
-    def add_transaction(self, recipient, amount, sender, signature, from_broadcast=False):
-        transaction = Transaction(sender, recipient, amount, signature)
+    def add_transaction(self, recipient, amount, sender, timestamp, signature, from_broadcast=False):
+        transaction = Transaction(sender, recipient, amount, timestamp, signature)
 
         if from_broadcast:
             check_funds = False
@@ -77,6 +92,7 @@ class Blockchain(Printable):
                 'recipient': transaction.recipient,
                 'amount': transaction.amount,
                 'sender': transaction.sender,
+                'timestamp': transaction.timestamp,
                 'signature': transaction.signature,
                 'from_broadcast': True
             })
@@ -120,12 +136,19 @@ class Blockchain(Printable):
         is_previous_hash_valid = block.previous_hash == hashed_block
         is_index_valid = block.index == len(self.chain)
         is_proof_valid = Verification.is_valid_proof(self.open_transactions, hashed_block, block.proof)
-        
+
         if is_previous_hash_valid and is_index_valid and is_proof_valid:
             self.chain.append(block)
+            self.update_open_transactions(block)
             return True
         else:
             return False
+
+    def update_open_transactions(self, block):
+        for transaction in block.transactions:
+            for open_transaction in self.open_transactions:
+                if transaction.signature == open_transaction.signature:
+                    self.open_transactions.remove(open_transaction)
 
 
     def add_peer_node(self, node):

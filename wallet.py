@@ -1,6 +1,7 @@
 from Crypto.PublicKey import RSA
 from Crypto.Signature import PKCS1_v1_5
 from Crypto.Hash import SHA256
+from time import time
 import binascii
 
 
@@ -49,8 +50,8 @@ class Wallet:
 
         return (ascii_private_key, ascii_public_key)
 
-    def sign_transaction(self, sender, recipient, amount):
-        encoded_transaction = (str(sender) + str(recipient) + str(amount)).encode('utf8')
+    def sign_transaction(self, sender, recipient, amount, timestamp):
+        encoded_transaction = (str(sender) + str(recipient) + str(amount) + str(timestamp)).encode('utf8')
         encrypted_trasaction = SHA256.new(encoded_transaction)
 
         binary_private_key = binascii.unhexlify(self.private_key)
@@ -65,7 +66,7 @@ class Wallet:
     
     @staticmethod
     def verify_transaction(transaction):
-        encoded_transaction = (str(transaction.sender) + str(transaction.recipient) + str(transaction.amount)).encode('utf8')
+        encoded_transaction = (str(transaction.sender) + str(transaction.recipient) + str(transaction.amount) + str(transaction.timestamp)).encode('utf8')
         encrypted_transaction = SHA256.new(encoded_transaction)
 
         binary_public_key = binascii.unhexlify(transaction.sender)

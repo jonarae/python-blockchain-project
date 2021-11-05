@@ -94,7 +94,9 @@ def add_block():
     if blockchain.add_block(block):
         BlockchainFile.save_data(blockchain)
         response = {
-            'message': 'Successfully added block!'
+            'message': 'Successfully added block!',
+            'block': block,
+            'funds': blockchain.get_balance(wallet.public_key)
         }
         return jsonify(response), 200
     else:
@@ -106,13 +108,13 @@ def add_block():
     
 @app.route('/chain', methods=['GET'])
 def get_chain():
-    blockchain_snapshot = blockchain.chain
-    blockchain_snapshot = [block.__dict__.copy()
-                           for block in blockchain_snapshot]
-    for block in blockchain_snapshot:
-        block['transactions'] = [transaction.__dict__.copy()
-                                 for transaction in block['transactions']]
-    return jsonify(blockchain_snapshot), 200
+    blockchain_dict = blockchain.to_order_dict()
+
+    response = {
+        'blockchain': blockchain_dict['chain'],
+        'funds': blockchain.get_balance(wallet.public_key)
+    }
+    return jsonify(response), 200
 
 
 @app.route ('/transaction', methods=['POST'])
@@ -124,7 +126,7 @@ def add_transaction():
         }
         return jsonify(response), 400
     
-    required_fields = ['recipient', 'amount']
+    required_fields = ['recipient', 'amount', 'timestamp']
     if not all(field in values for field in required_fields):
         response = {
             'message': 'Required data is missing'
@@ -133,6 +135,7 @@ def add_transaction():
 
     recipient = values['recipient']
     amount = values['amount']
+    timestamp = values['timestamp']
 
     if 'from_broadcast' in values and values['from_broadcast'] is True:
         sender = values['sender']
@@ -140,7 +143,7 @@ def add_transaction():
         from_broadcast = True
     else:
         sender = wallet.public_key
-        signature = wallet.sign_transaction(sender, recipient, amount)
+        signature = wallet.sign_transaction(sender, recipient, amount, timestamp)
         from_broadcast = False
 
     if signature:
@@ -157,7 +160,7 @@ def add_transaction():
         }
         return jsonify(response), 400
 
-    is_success = blockchain.add_transaction(recipient, amount, sender, signature, from_broadcast)
+    is_success = blockchain.add_transaction(recipient, amount, sender, timestamp, signature, from_broadcast)
 
     if is_success:
         BlockchainFile.save_data(blockchain)
