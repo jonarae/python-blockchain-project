@@ -45,13 +45,15 @@ class Wallet:
         generated_key = RSA.generate(1024)
         binary_public_key = generated_key.publickey().exportKey(format='DER')
         binary_private_key = generated_key.exportKey(format='DER')
-        ascii_private_key = binascii.hexlify(binary_private_key).decode('ascii')
+        ascii_private_key = binascii.hexlify(
+            binary_private_key).decode('ascii')
         ascii_public_key = binascii.hexlify(binary_public_key).decode('ascii')
 
         return (ascii_private_key, ascii_public_key)
 
     def sign_transaction(self, sender, recipient, amount, timestamp):
-        encoded_transaction = (str(sender) + str(recipient) + str(amount) + str(timestamp)).encode('utf8')
+        encoded_transaction = (
+            str(sender) + str(recipient) + str(amount) + str(timestamp)).encode('utf8')
         encrypted_trasaction = SHA256.new(encoded_transaction)
 
         binary_private_key = binascii.unhexlify(self.private_key)
@@ -63,10 +65,10 @@ class Wallet:
 
         return ascii_signature
 
-    
     @staticmethod
     def verify_transaction(transaction):
-        encoded_transaction = (str(transaction.sender) + str(transaction.recipient) + str(transaction.amount) + str(transaction.timestamp)).encode('utf8')
+        encoded_transaction = (str(transaction.sender) + str(transaction.recipient) + str(
+            transaction.amount) + str(transaction.timestamp)).encode('utf8')
         encrypted_transaction = SHA256.new(encoded_transaction)
 
         binary_public_key = binascii.unhexlify(transaction.sender)
@@ -76,6 +78,3 @@ class Wallet:
         binary_signature = binascii.unhexlify(transaction.signature)
 
         return verifier.verify(encrypted_transaction, binary_signature)
-
-
-    

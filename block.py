@@ -16,7 +16,7 @@ class Block(Printable):
             self.index = dict['index']
             self.timestamp = dict['timestamp']
             self.proof = dict['proof']
-            
+
             self.transactions = []
             for transaction in dict['transactions']:
                 self.transactions.append(Transaction(dict=transaction))

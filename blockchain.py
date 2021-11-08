@@ -22,18 +22,18 @@ class Blockchain(Printable):
     def to_order_dict(self):
         blockchain_dict = self.__dict__.copy()
         blockchain_dict['peer_nodes'] = list(self.peer_nodes)
-        
+
         blockchain_dict['chain'] = []
         blockchain_dict['open_transactions'] = []
 
         for block in self.chain:
             blockchain_dict['chain'].append(block.to_order_dict())
         for transaction in self.open_transactions:
-            blockchain_dict['open_transactions'].append(transaction.to_order_dict())
-            
+            blockchain_dict['open_transactions'].append(
+                transaction.to_order_dict())
 
         return blockchain_dict
- 
+
     def get_open_transactions(self):
         return self.open_transactions
 
@@ -72,7 +72,8 @@ class Blockchain(Printable):
         return amount_received - amount_sent
 
     def add_transaction(self, recipient, amount, sender, timestamp, signature, from_broadcast=False):
-        transaction = Transaction(sender, recipient, amount, timestamp, signature)
+        transaction = Transaction(
+            sender, recipient, amount, timestamp, signature)
 
         if from_broadcast:
             check_funds = False
@@ -84,7 +85,7 @@ class Blockchain(Printable):
             self.broadcast_transaction(transaction)
             return True
         return False
-    
+
     def broadcast_transaction(self, transaction):
         for node_id in self.peer_nodes:
             requests.post(f'http://{node_id}/transaction', json={
@@ -95,27 +96,27 @@ class Blockchain(Printable):
                 'signature': transaction.signature,
                 'from_broadcast': True
             })
- 
 
     def mine_block(self, recipient):
-        if recipient == None:
+        if recipient is None:
             return False
 
         last_block = self.get_last_blockchain_value()
         hashed_block = hash_block(last_block)
         proof = self.proof_of_work()
-        
-        reward_transaction = Transaction('MINING', recipient, MINING_REWARD, '')
+
+        reward_transaction = Transaction(
+            'MINING', recipient, MINING_REWARD, '')
 
         copied_transactions = self.open_transactions[:]
         copied_transactions.append(reward_transaction)
 
-        mined_block = Block(hashed_block, len(self.chain), copied_transactions, proof)
+        mined_block = Block(hashed_block, len(self.chain),
+                            copied_transactions, proof)
         self.chain.append(mined_block)
         self.open_transactions = []
         self.broadcast_mined_block(mined_block)
         return mined_block
-
 
     def broadcast_mined_block(self, mined_block):
         for node_id in self.peer_nodes:
@@ -125,7 +126,7 @@ class Blockchain(Printable):
                     'block': mined_block.to_order_dict()
                 }
             )
-    
+
     def add_block(self, mined_block):
         block = Block(dict=mined_block)
 
@@ -133,14 +134,15 @@ class Blockchain(Printable):
         hashed_block = hash_block(last_block)
 
         is_previous_hash_valid = block.previous_hash == hashed_block
-        is_proof_valid = Verification.is_valid_proof(self.open_transactions, hashed_block, block.proof)
+        is_proof_valid = Verification.is_valid_proof(
+            self.open_transactions, hashed_block, block.proof)
         is_index_valid = block.index == len(self.chain)
 
         if is_previous_hash_valid and is_index_valid and is_proof_valid:
             self.chain.append(block)
             self.update_open_transactions(block)
             return True
-        else: 
+        else:
             if block.index > len(self.chain):
                 self.resolve()
                 return True
@@ -159,12 +161,13 @@ class Blockchain(Printable):
             for block_dict in peer_blockchain_dict:
                 peer_blockchain.append(Block(dict=block_dict))
 
-            is_peer_blockchain_longer = len(peer_blockchain) > longest_chain_length
+            is_peer_blockchain_longer = len(
+                peer_blockchain) > longest_chain_length
 
             if is_peer_blockchain_longer and Verification.verify_chain(peer_blockchain):
                 valid_chain = peer_blockchain
                 to_replace_chain = True
-        
+
         if to_replace_chain:
             self.chain = valid_chain
             self.open_transactions = []
@@ -177,12 +180,11 @@ class Blockchain(Printable):
                 if transaction.signature == open_transaction.signature:
                     self.open_transactions.remove(open_transaction)
 
-
     def add_peer_node(self, node):
         self.peer_nodes.add(node)
-    
+
     def remove_peer_node(self, node):
         self.peer_nodes.discard(node)
-    
+
     def get_all_nodes(self):
         return list(self.peer_nodes)

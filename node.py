@@ -13,9 +13,11 @@ CORS(app)
 def get_node_ui():
     return send_from_directory('ui', 'node.html')
 
+
 @app.route('/network', methods=['GET'])
 def get_network_ui():
     return send_from_directory('ui', 'network.html')
+
 
 @app.route('/balance', methods=['GET'])
 def get_balance():
@@ -77,19 +79,20 @@ def mine_block():
     else:
         response = {
             'message': 'Adding new block failed!',
-            'wallet_up': recipient != None
+            'wallet_up': recipient is not None
         }
         return jsonify(response), 400
+
 
 @app.route('/block', methods=['POST'])
 def add_block():
     values = request.get_json()
-    if not 'block' in values:
+    if 'block' not in values:
         response = {
             'message': 'No block value found.'
         }
         return jsonify(response), 400
-    
+
     block = values['block']
     if blockchain.add_block(block):
         BlockchainFile.save_data(blockchain)
@@ -105,7 +108,7 @@ def add_block():
         }
         return jsonify(response), 400
 
-    
+
 @app.route('/chain', methods=['GET'])
 def get_chain():
     blockchain_dict = blockchain.to_order_dict()
@@ -117,7 +120,7 @@ def get_chain():
     return jsonify(response), 200
 
 
-@app.route ('/transaction', methods=['POST'])
+@app.route('/transaction', methods=['POST'])
 def add_transaction():
     values = request.get_json()
     if not values:
@@ -125,7 +128,7 @@ def add_transaction():
             'message': 'No data found'
         }
         return jsonify(response), 400
-    
+
     required_fields = ['recipient', 'amount', 'timestamp']
     if not all(field in values for field in required_fields):
         response = {
@@ -143,7 +146,8 @@ def add_transaction():
         from_broadcast = True
     else:
         sender = wallet.public_key
-        signature = wallet.sign_transaction(sender, recipient, amount, timestamp)
+        signature = wallet.sign_transaction(
+            sender, recipient, amount, timestamp)
         from_broadcast = False
 
     if signature:
@@ -154,13 +158,14 @@ def add_transaction():
                 }
                 return jsonify(response), 200
 
-    if wallet.public_key == None:
+    if wallet.public_key is None:
         response = {
             'message': 'No wallet setup'
         }
         return jsonify(response), 400
 
-    is_success = blockchain.add_transaction(recipient, amount, sender, timestamp, signature, from_broadcast)
+    is_success = blockchain.add_transaction(
+        recipient, amount, sender, timestamp, signature, from_broadcast)
 
     if is_success:
         BlockchainFile.save_data(blockchain)
@@ -186,7 +191,8 @@ def add_transaction():
 @app.route('/transactions', methods=['GET'])
 def get_open_transactions():
     open_transactions = blockchain.get_open_transactions()
-    open_transactions_dict = [transaction.__dict__.copy() for transaction in open_transactions]
+    open_transactions_dict = [transaction.__dict__.copy()
+                              for transaction in open_transactions]
     return jsonify(open_transactions_dict), 200
 
 
@@ -198,12 +204,12 @@ def add_node():
             'message': 'No data found.'
         }
         return jsonify(response), 401
-    if not 'node' in values:
+    if 'node' not in values:
         response = {
             'message': 'No node data found.'
         }
         return jsonify(response), 401
-    
+
     node = values['node']
     blockchain.add_peer_node(node)
     BlockchainFile.save_data(blockchain)
@@ -214,14 +220,15 @@ def add_node():
     }
     return jsonify(response), 200
 
+
 @app.route('/node/<node_url>', methods=['DELETE'])
 def remove_node(node_url):
-    if node_url == '' or node_url == None:
+    if node_url == '' or node_url is None:
         response = {
             'message': 'No node found.'
         }
         return jsonify(response), 400
-    
+
     blockchain.remove_peer_node(node_url)
     BlockchainFile.save_data(blockchain)
 
@@ -230,7 +237,7 @@ def remove_node(node_url):
         'all_nodes': blockchain.get_all_nodes()
     }
     return jsonify(response), 200
-    
+
 
 @app.route('/nodes', methods=['GET'])
 def get_nodes():

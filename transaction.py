@@ -1,6 +1,7 @@
 from utility.printable import Printable
 from time import time
 
+
 class Transaction(Printable):
     def __init__(self, sender='', recipient='', amount='', timestamp=time(), signature='', dict=None):
         if dict is None:
