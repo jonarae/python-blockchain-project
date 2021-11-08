@@ -131,3 +131,6 @@ dmypy.json
 # Blockchain txt files
 blockchain*.txt
 wallet*.txt
+
+# VS Code
+.vscode/
