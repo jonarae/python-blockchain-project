@@ -69,7 +69,7 @@ class Node:
             else:
                 print('Input was invalid, please pick a value from the list!')
 
-            if not Verification.verify_chain(self.blockchain):
+            if not Verification.verify_chain(self.blockchain.chain):
                 print('Invalid chain!')
                 self.print_blockchain_elements()
                 break

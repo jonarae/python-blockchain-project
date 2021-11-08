@@ -30,10 +30,10 @@ class Verification:
 
     @classmethod
     def verify_chain(cls, blockchain):
-        for (index, block) in enumerate(blockchain.chain):
+        for (index, block) in enumerate(blockchain):
             if (index == 0):
                 continue
-            elif (block.previous_hash != hash_block(blockchain.chain[index - 1])):
+            elif (block.previous_hash != hash_block(blockchain[index - 1])):
                 return False
 
             block_excluding_reward_transaction = block.transactions[:-1]
