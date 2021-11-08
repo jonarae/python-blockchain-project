@@ -6,7 +6,6 @@ from utility.printable import Printable
 
 import functools
 import requests
-import pickle
 from transaction import Transaction
 from block import Block
 
@@ -97,7 +96,7 @@ class Blockchain(Printable):
                 'from_broadcast': True
             })
  
- 
+
     def mine_block(self, recipient):
         if recipient == None:
             return False
