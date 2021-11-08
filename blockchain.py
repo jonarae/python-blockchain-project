@@ -110,8 +110,7 @@ class Blockchain(Printable):
         copied_transactions = self.open_transactions[:]
         copied_transactions.append(reward_transaction)
 
-        mined_block = Block(hashed_block, len(
-            self.chain), copied_transactions, proof)
+        mined_block = Block(hashed_block, len(self.chain), copied_transactions, proof)
         self.chain.append(mined_block)
         self.open_transactions = []
         self.broadcast_mined_block(mined_block)
@@ -134,15 +133,43 @@ class Blockchain(Printable):
         hashed_block = hash_block(last_block)
 
         is_previous_hash_valid = block.previous_hash == hashed_block
-        is_index_valid = block.index == len(self.chain)
         is_proof_valid = Verification.is_valid_proof(self.open_transactions, hashed_block, block.proof)
+        is_index_valid = block.index == len(self.chain)
 
         if is_previous_hash_valid and is_index_valid and is_proof_valid:
             self.chain.append(block)
             self.update_open_transactions(block)
             return True
-        else:
+        else: 
+            if block.index > len(self.chain):
+                self.resolve()
+                return True
             return False
+
+    def resolve(self):
+        valid_chain = self.chain
+        longest_chain_length = len(self.chain)
+        to_replace_chain = False
+
+        for node_id in self.peer_nodes:
+            response = requests.get(f'http://{node_id}/chain')
+            peer_blockchain_dict = response.json()['blockchain']
+
+            peer_blockchain = []
+            for block_dict in peer_blockchain_dict:
+                peer_blockchain.append(Block(dict=block_dict))
+
+            is_peer_blockchain_longer = len(peer_blockchain) > longest_chain_length
+
+            if is_peer_blockchain_longer and Verification.verify_chain(peer_blockchain):
+                valid_chain = peer_blockchain
+                to_replace_chain = True
+        
+        if to_replace_chain:
+            self.chain = valid_chain
+            self.open_transactions = []
+
+        return True
 
     def update_open_transactions(self, block):
         for transaction in block.transactions:
