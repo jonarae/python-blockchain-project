@@ -96,7 +96,8 @@ class Blockchain(Printable):
                 'signature': transaction.signature,
                 'from_broadcast': True
             })
-
+ 
+ 
     def mine_block(self, recipient):
         if recipient == None:
             return False
