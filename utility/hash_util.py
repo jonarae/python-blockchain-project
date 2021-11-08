@@ -9,5 +9,5 @@ def hash_block(block):
     encoded_block = block_json_string.encode()
     hashed_block = hashlib.sha256(encoded_block)
     hashed_block_hex = hashed_block.hexdigest()
-    
+
     return hashed_block_hex
